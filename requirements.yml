@@ -1,0 +1,3 @@
+---
+- src: git+https://github.com/georambo/test-role.git
+  name: nginx

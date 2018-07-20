@@ -1,4 +1,42 @@
 ---
-- hosts: local
+- name: Create inventory
+  hosts: localhost
+  connection: docker
+  gather_facts: False
+
+  tasks:
+    - name: Start a debian container
+      docker_container:
+        name: debian-test
+        image: debian:latest
+        command: ["sleep", "1200"]
+
+    - name: add debian container to inventory
+      add_host:
+        name: debian-test
+        ansible_connection: docker
+        ansible_user: root
+      changed_when: false
+
+    - name: install python on container
+      command: docker exec debian-test /bin/sh -c "apt-get update; apt-get install python-pip -y"
+
+    - name: Start a centos container
+      docker_container:
+        name: centos-test
+        image: centos:latest
+        command: ["sleep", "1200"]
+
+    - name: add container to inventory
+      add_host:
+        name: centos-test
+        ansible_connection: docker
+        ansible_user: root
+      changed_when: false
+
+- name: Run nginx role
+  hosts: debian-test, centos-test
+  connection: docker
+  user: root
   roles:
-     - nginx-test-role
+    - nginx
